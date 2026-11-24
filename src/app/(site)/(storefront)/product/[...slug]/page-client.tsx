@@ -1520,7 +1520,7 @@ function ProductContent({ product }: { product?: ProcurementProduct }) {
             </button>
             {descriptionProdOpen && (
               <div
-                className="pb-3 text-sm leading-relaxed break-words [&_img]:my-2 [&_img]:h-auto [&_img]:max-w-full"
+                className="max-w-full min-w-0 overflow-x-auto pb-3 text-sm leading-relaxed break-words [&_*]:max-w-full [&_img]:my-2 [&_img]:!h-auto [&_table]:w-full [&_table]:table-fixed"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeProductDescription(descriptionDesc),
                 }}
