@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "The product image must have an HTTPS link",
   "Order creation failed please try again": "Order creation failed please try again",
   "Enter courier": "Enter courier",
-  "Unable to recognize this product": "Unable to recognize this product"
+  "Unable to recognize this product": "Unable to recognize this product",
+  "Back to top": "Back to top",
+  "Cart, {count} items": "Cart, {count} items"
 }

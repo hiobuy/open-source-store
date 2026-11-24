@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "商品画像はHTTPSリンクである必要があります",
   "Order creation failed please try again": "注文の作成に失敗しました。もう一度お試しください",
   "Enter courier": "配送業者を入力",
-  "Unable to recognize this product": "この商品を認識できません"
+  "Unable to recognize this product": "この商品を認識できません",
+  "Back to top": "トップへ戻る",
+  "Cart, {count} items": "カート、{count}点"
 }

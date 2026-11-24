@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "Изображение товара должно иметь HTTPS-ссылку",
   "Order creation failed please try again": "Не удалось создать заказ. Попробуйте снова",
   "Enter courier": "Введите службу доставки",
-  "Unable to recognize this product": "Не удалось распознать этот товар"
+  "Unable to recognize this product": "Не удалось распознать этот товар",
+  "Back to top": "Наверх",
+  "Cart, {count} items": "Корзина, товаров: {count}"
 }

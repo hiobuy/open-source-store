@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "商品图片必须是 HTTPS 链接",
   "Order creation failed please try again": "订单创建失败，请重试",
   "Enter courier": "请输入快递公司",
-  "Unable to recognize this product": "无法识别该商品"
+  "Unable to recognize this product": "无法识别该商品",
+  "Back to top": "回到顶部",
+  "Cart, {count} items": "购物车，{count} 件商品"
 }

@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/popover";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useProcurementCartCount } from "@/lib/procurement/cart-count";
+import { useProcurementSessionStore } from "@/lib/procurement/session-store";
 import { cn } from "@/lib/utils";
 import { ArrowUpToLine, Headphones, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -87,22 +89,38 @@ function ChinaTime() {
 
 function SupportPanel({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations();
+  const hasSession = useProcurementSessionStore((state) => state.hasSession);
+  const cartCount = useProcurementCartCount((state) => state.count);
+  const showCartBadge = hasSession && cartCount > 0;
+  const cartLabel = showCartBadge
+    ? t("Cart, {count} items", { count: cartCount })
+    : t("Cart");
 
   return (
     <div className="flex max-h-[calc(100dvh-2rem)] w-16 flex-col overflow-y-auto rounded-3xl bg-white px-1 py-3 shadow-[0_8px_28px_rgba(68,48,25,0.1)]">
       <ChinaTime />
       <LocalizedLink
         href="/cart"
-        aria-label={t("Cart")}
-        title={t("Cart")}
-        className={cn(ACTION_CLASS, "mt-2 text-[#242424]")}
+        aria-label={cartLabel}
+        title={cartLabel}
+        className={cn(ACTION_CLASS, "relative mt-2 text-[#242424]")}
         onClick={onNavigate}
       >
-        <ShoppingCart
-          className="size-[26px]"
-          strokeWidth={2.25}
-          aria-hidden="true"
-        />
+        <span className="relative inline-flex">
+          <ShoppingCart
+            className="size-[26px]"
+            strokeWidth={2.25}
+            aria-hidden="true"
+          />
+          {showCartBadge && (
+            <span
+              aria-hidden="true"
+              className="bg-primary absolute -end-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] leading-none font-bold text-white"
+            >
+              {cartCount > 99 ? "99+" : cartCount}
+            </span>
+          )}
+        </span>
       </LocalizedLink>
       <div className="mx-auto my-2 h-[2px] w-7 shrink-0 bg-[#eee9e1]" />
       {CHANNELS.map(({ name, href, Icon, color }) => (

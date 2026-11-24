@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "يجب أن تحتوي صورة المنتج على رابط HTTPS",
   "Order creation failed please try again": "تعذر إنشاء الطلب. يرجى المحاولة مرة أخرى",
   "Enter courier": "أدخل شركة الشحن",
-  "Unable to recognize this product": "تعذّر التعرّف على هذا المنتج"
+  "Unable to recognize this product": "تعذّر التعرّف على هذا المنتج",
+  "Back to top": "العودة إلى الأعلى",
+  "Cart, {count} items": "السلة، {count} عناصر"
 }

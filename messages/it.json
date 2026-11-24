@@ -1220,5 +1220,7 @@
   "The product image must have an HTTPS link": "L'immagine del prodotto deve avere un link HTTPS",
   "Order creation failed please try again": "Creazione ordine non riuscita. Riprova",
   "Enter courier": "Inserisci il corriere",
-  "Unable to recognize this product": "Impossibile riconoscere questo prodotto"
+  "Unable to recognize this product": "Impossibile riconoscere questo prodotto",
+  "Back to top": "Torna su",
+  "Cart, {count} items": "Carrello, {count} articoli"
 }
