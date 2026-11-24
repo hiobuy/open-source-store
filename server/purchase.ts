@@ -28,14 +28,21 @@ function createdRemoteId(data: Record<string, unknown>, localId: string) {
   if (data.external_order_id && data.external_order_id !== localId) return null;
   return stringId(data.order_id) ?? (data.success === true && data.external_order_id === localId ? stringId(data.order_sn) : null);
 }
-function remoteAmount(data: Record<string, unknown>) {
+function remoteAmount(data: Record<string, unknown>, channel: string) {
   if (data.channel === "manual" && data.currency === "CNY" && data.monetary_unit === "CNY_minor") {
     const payment=record(record(data.total).payment);
     if(payment.currency === "CNY" && Number.isSafeInteger(payment.amount) && Number(payment.amount)>=0) return Number(payment.amount);
   }
-  const total=record(data.order).total;
-  const amount=typeof total==="number"?total:record(total).currency==="CNY"?record(total).amount:
-    data.currency==="CNY"&&Number.isSafeInteger(data.payment)&&Number.isSafeInteger(data.shipping)?Number(data.payment)+Number(data.shipping):null;
+  const total = record(data.order).total;
+  let amount: unknown;
+  if (typeof total === "number") {
+    amount = total;
+  } else if (record(total).currency === "CNY") {
+    amount = record(total).amount;
+  } else if (data.currency === "CNY" && Number.isSafeInteger(data.payment) && Number.isSafeInteger(data.shipping)) {
+    // A 1688 create response itemizes domestic shipping inside the payable total.
+    amount = channel === "1688" ? data.payment : Number(data.payment) + Number(data.shipping);
+  }
   return Number.isSafeInteger(amount)&&Number(amount)>=0?Number(amount):null;
 }
 async function costCoverage(db: Database, orderId: string, amount: number | null) {
@@ -189,7 +196,18 @@ export async function remotePurchaseView(db:Database,id:string) {
   if(!row)return null;
   const manualSource=row.channel === "manual" ? (await db.select().from(purchaseQuotes).where(eq(purchaseQuotes.id,row.quoteId)))[0] : null;
   const attempts=await db.select({action:purchaseAttempts.action,state:purchaseAttempts.state,createdAt:purchaseAttempts.createdAt,updatedAt:purchaseAttempts.updatedAt}).from(purchaseAttempts).where(eq(purchaseAttempts.orderId,id));
-  return {...row,manual:manualSource?record(JSON.parse(manualSource.preview)).manualInput:undefined,syncLockToken:undefined,syncLockedUntil:undefined,canSync:row.channel==="manual"?!!row.remoteId:!!row.remoteId||!!createdRemoteId(record(JSON.parse(row.lastResult??"{}")),id),remoteCostCnyCents:remoteAmount(record(JSON.parse(row.lastResult??"{}"))),state:["creating","paying"].includes(row.state)&&row.updatedAt<Date.now()-60000?"unknown":row.state,lastResult:undefined,attempts:attempts.map(a=>({...a,state:a.state==="executing"&&a.updatedAt<Date.now()-60000?"unknown":a.state}))};
+  const lastResult = record(JSON.parse(row.lastResult ?? "{}"));
+  return {
+    ...row,
+    manual: manualSource ? record(JSON.parse(manualSource.preview)).manualInput : undefined,
+    syncLockToken: undefined,
+    syncLockedUntil: undefined,
+    canSync: !!row.remoteId || (row.channel !== "manual" && !!createdRemoteId(lastResult, id)),
+    remoteCostCnyCents: remoteAmount(lastResult, row.channel),
+    state: ["creating", "paying"].includes(row.state) && row.updatedAt < Date.now() - 60000 ? "unknown" : row.state,
+    lastResult: undefined,
+    attempts: attempts.map(a => ({ ...a, state: a.state === "executing" && a.updatedAt < Date.now() - 60000 ? "unknown" : a.state })),
+  };
 }
 export async function performPurchaseAction(db: Database, token: string, actor: Actor, id: string, action:"create"|"sync"|"pay"|"cancel", reason?:string, maxCostCnyCents?:number, syncDeadline?:number) {
   const r=(await db.select().from(procurementRemote).where(eq(procurementRemote.orderId,id)))[0];if(!r)return missing();
@@ -212,7 +230,7 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
     const payment=order.payment_status??result.payment_status;
     const paid=["paid","success"].includes(String(payment).toLowerCase());
     const cancelled=["cancelled","canceled","closed"].includes(String(status).toLowerCase());
-    const amount=remoteAmount(result);
+    const amount=remoteAmount(result,r.channel);
     const mismatch=r.channel === "manual" && !paid && r.paymentStatus === "unpaid" ? amount === null || amount !== r.costCnyCents : await costCoverage(db,id,amount)!=="covered";
     const [synced] = await db.batch([
       db.update(procurementRemote).set({syncNextAt:Date.now()+5*60_000,remoteId:r.remoteId,remoteStatus:status,lastResult:JSON.stringify(result),updatedAt:Date.now(),...(["unknown","creating","review_required"].includes(r.state)?{state:mismatch?"review_required":"created"}:{}),...(paid?{paymentStatus:"paid",state:"created",paidCostCnyCents:sql`COALESCE(${procurementRemote.paidCostCnyCents}, ${amount})`}:{}),...(mismatch?{state:"review_required"}:{}),...(cancelled?{state:"cancelled"}:{})}).where(and(eq(procurementRemote.orderId,id),eq(procurementRemote.updatedAt,r.updatedAt))).returning({orderId:procurementRemote.orderId}),
@@ -254,7 +272,7 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
       const detail=requireProcurementResult(await callProcurement(token,"orderDetail",body));
       const remoteOrder=record(detail.order);
       if(stringId(remoteOrder.order_id??remoteOrder.id??detail.order_id)!==r.remoteId)conflict("Remote order identity did not match.");
-      const amount=remoteAmount(detail);
+      const amount=remoteAmount(detail,r.channel);
       if(r.channel === "manual" && (amount !== r.costCnyCents || ["paid","success"].includes(String(remoteOrder.payment_status??detail.payment_status).toLowerCase()))) conflict("Manual purchase cost or payment state changed. Refresh remote status before paying.");
       if(await costCoverage(db,id,amount)!=="covered")conflict("Customer receipts do not cover the HioBuy cost, or the historical exchange rate is unavailable.");
       if(maxCostCnyCents!==undefined && (amount===null || amount>maxCostCnyCents))conflict("The HioBuy cost exceeds your confirmed payment limit. Review the order before paying.");
@@ -277,7 +295,7 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
   const remoteId=action==="create"?createdRemoteId(data,id):r.remoteId;
   const confirmed=success&&!!remoteId&&data.pending!==true;
   const settled=action==="pay"&&confirmed&&data.success===true&&data.payment_status==="success";
-  const creationCoverage=action==="create"&&confirmed?await costCoverage(db,id,remoteAmount(data)):null;
+  const creationCoverage=action==="create"&&confirmed?await costCoverage(db,id,remoteAmount(data,r.channel)):null;
   const state=action==="create"?(confirmed?(creationCoverage!==null&&creationCoverage!=="covered"?"review_required":"created"):"unknown"):action==="cancel"?"cancel_pending":"created";
   const attemptState=action==="pay"?(settled?"succeeded":"unknown"):confirmed?"succeeded":"unknown";
   await db.batch([
@@ -295,7 +313,7 @@ export async function reconcilePurchase(db:Database,token:string,actor:Actor,id:
   if(!attempt||attempt.updatedAt>Date.now()-60000||!["unknown","executing"].includes(attempt.state)||r.remoteId&&r.remoteId!==remoteId)conflict("Only an unresolved submission can be reconciled after its request has ended.");
   const result=requireProcurementResult(await callProcurement(token,"orderDetail",{channel:r.channel,order_id:remoteId,response_format:"standard"}));
   const order=record(result.order),returnedId=stringId(order.order_id??order.id??result.order_id);
-  const amount=remoteAmount(result);
+  const amount=remoteAmount(result,r.channel);
   const external=stringId(order.out_order_id??order.external_order_id??order.outer_purchase_id);
   if(returnedId!==remoteId||external&&external!==id)conflict("Remote identity or external reference did not match. Contact HioBuy for reconciliation.");
   const coverage=await costCoverage(db,id,amount);

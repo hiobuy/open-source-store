@@ -260,6 +260,30 @@ describe("HioBuy purchase contracts",()=>{
     expect(fetcher.mock.calls.filter(([u])=>String(u).endsWith("/pay"))).toHaveLength(0);
     expect((await customerPurchase(db,actor.id,order.id)).bills[0].status).toBe("paid");
   });
+  it("counts 1688 domestic freight once from submission through payment", async () => {
+    const quote = preview();
+    quote.total = { merchandise: money(444), shipping: money(200), payment: money(644) };
+    const line = quote.sellers[0].lines[0];
+    line.unit_price = money(222);
+    line.line_total = money(444);
+    const remoteId = "DG-FREIGHT-INCLUDED";
+    const fetcher = fakeRemote({
+      "/v1/orders/preview": quote,
+      "/v1/orders/create": { success: true, order_id: remoteId, currency: "CNY", monetary_unit: "CNY_minor", payment: 644, shipping: 200 },
+      "/v1/orders/detail": { order: { order_id: remoteId, total: money(644), purchase_amount: money(444), shipping_fee: money(200) } },
+    });
+    const order = await makeOrder();
+    await payPurchaseBill(db, actor, order.id);
+    for (const action of ["create", "sync"] as const) {
+      expect(await performPurchaseAction(db, token, actor, order.id, action)).toMatchObject({
+        state: "created", paymentStatus: "unpaid", remoteId, remoteCostCnyCents: 644,
+      });
+    }
+    await performPurchaseAction(db, token, actor, order.id, "pay", undefined, 644);
+    const pays = fetcher.mock.calls.filter(([url]) => String(url).endsWith("/pay"));
+    expect(pays).toHaveLength(1);
+    expect(JSON.parse(String(pays[0][1]?.body)).pay_amount).toBe(644);
+  });
   it("accepts higher or equal customer receipts, clears only amount review and pays the actual cost once",async()=>{
     fakeRemote();const order=await makeOrder();await payPurchaseBill(db,actor,order.id);
     fakeRemote({"/v1/orders/create":{success:true,order_id:"COVERED",currency:"CNY",payment:2300,shipping:0}});
