@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaGithub } from "react-icons/fa6";
 import { getTranslations } from "next-intl/server";
 
 export async function SiteFooter() {
@@ -104,19 +105,31 @@ export async function SiteFooter() {
             ))}
           </div>
           <div className="mb-6 border-t border-white opacity-30" />
-          <div className="text-sm">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {images.map((item) => (
-                <span key={item.image}>
-                  <img
-                    src={item.image}
-                    alt={item.alt}
-                    className="h-12 w-auto object-contain"
-                  />
-                </span>
-              ))}
+          <div className="flex flex-wrap items-end justify-between gap-4 text-sm">
+            <div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {images.map((item) => (
+                  <span key={item.image}>
+                    <img
+                      src={item.image}
+                      alt={item.alt}
+                      className="h-12 w-auto object-contain"
+                    />
+                  </span>
+                ))}
+              </div>
+              <div className="mt-2 opacity-80">{t.raw("@2024 XXXX Limit")}</div>
             </div>
-            <div className="mt-2 opacity-80">{t.raw("@2024 XXXX Limit")}</div>
+            <a
+              href="https://github.com/hiobuy/open-source-store"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t("Open source on GitHub")}
+              title={t("Open source on GitHub")}
+              className="inline-flex items-center justify-center rounded p-1 text-[#ACBCD9] transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <FaGithub aria-hidden="true" size={24} />
+            </a>
           </div>
         </div>
       </div>

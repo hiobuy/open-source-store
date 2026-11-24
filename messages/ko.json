@@ -1222,5 +1222,6 @@
   "Enter courier": "택배사를 입력하세요",
   "Unable to recognize this product": "이 상품을 인식할 수 없습니다",
   "Back to top": "맨 위로",
-  "Cart, {count} items": "카트, 상품 {count}개"
+  "Cart, {count} items": "카트, 상품 {count}개",
+  "Open source on GitHub": "GitHub 오픈소스"
 }

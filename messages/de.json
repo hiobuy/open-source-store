@@ -1222,5 +1222,6 @@
   "Enter courier": "Versanddienstleister eingeben",
   "Unable to recognize this product": "Dieses Produkt konnte nicht erkannt werden",
   "Back to top": "Nach oben",
-  "Cart, {count} items": "Warenkorb, {count} Artikel"
+  "Cart, {count} items": "Warenkorb, {count} Artikel",
+  "Open source on GitHub": "Open Source auf GitHub"
 }

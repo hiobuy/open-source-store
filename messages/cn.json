@@ -1222,5 +1222,6 @@
   "Enter courier": "请输入快递公司",
   "Unable to recognize this product": "无法识别该商品",
   "Back to top": "回到顶部",
-  "Cart, {count} items": "购物车，{count} 件商品"
+  "Cart, {count} items": "购物车，{count} 件商品",
+  "Open source on GitHub": "GitHub 仓库"
 }

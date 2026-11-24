@@ -1222,5 +1222,6 @@
   "Enter courier": "Wpisz przewoźnika",
   "Unable to recognize this product": "Nie można rozpoznać tego produktu",
   "Back to top": "Do góry",
-  "Cart, {count} items": "Wózek, liczba produktów: {count}"
+  "Cart, {count} items": "Wózek, liczba produktów: {count}",
+  "Open source on GitHub": "Otwarty kod na GitHub"
 }

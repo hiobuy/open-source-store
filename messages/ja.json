@@ -1222,5 +1222,6 @@
   "Enter courier": "配送業者を入力",
   "Unable to recognize this product": "この商品を認識できません",
   "Back to top": "トップへ戻る",
-  "Cart, {count} items": "カート、{count}点"
+  "Cart, {count} items": "カート、{count}点",
+  "Open source on GitHub": "GitHub でオープンソース公開中"
 }

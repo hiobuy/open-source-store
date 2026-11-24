@@ -1222,5 +1222,6 @@
   "Enter courier": "Inserisci il corriere",
   "Unable to recognize this product": "Impossibile riconoscere questo prodotto",
   "Back to top": "Torna su",
-  "Cart, {count} items": "Carrello, {count} articoli"
+  "Cart, {count} items": "Carrello, {count} articoli",
+  "Open source on GitHub": "Open source su GitHub"
 }
