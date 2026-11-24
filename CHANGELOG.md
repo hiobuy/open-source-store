@@ -1,0 +1,13 @@
+# Changelog
+
+All notable changes to **HioBuy Store** are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+
+- **Storefront & Member Center (Web Worker)**: Next.js 16 App Router application run via vinext on Cloudflare Workers (`hiobuy-procurement-website`), providing product search (keyword, URL parse, and image search), categories, server-rendered product detail pages, unified shopping cart, purchase orders and manual purchase orders, package pre-alerts, consolidation, live freight estimation, shipments and tracking, USD customer wallet, address book, invoice profiles, favorites, browsing history, shop subscriptions, announcements, local blog and help center, and 12-language `next-intl` localization (including RTL Arabic).
+- **Admin Console**: Client-mounted React console at `/admin` (with `/admin/login`, `/admin/invite`, and read-only `/admin/demo`), including overview, procurement orders, warehouse packages, logistics orders, customers and customer addresses, announcements, marketing (coupons and campaigns), payments and refunds, assistant knowledge, cost/profit calculator, Developer Guide (`/admin/guide`), and settings for business branding, HioBuy integration, client origins, destinations, freight/product pricing, unified exchange rates, HioBuy wallet, email templates/rules/logs, advanced settings, payments, invoicing, tracking, and team permissions.
+- **Backend API & Fulfillment Integration (API Worker)**: Hono API on Cloudflare Workers (`hiobuy-procurement`) backed by Cloudflare D1 (Drizzle ORM) and R2, integrating HioBuy product, procurement, fulfillment, and warehouse value-added service APIs, signed webhooks, persistent sync tasks with retry and review states, and scheduled cron jobs.
+- **Authentication, Payments & Messaging**: Better Auth (email/password verification, Google OAuth, optional Turnstile, staff RBAC, and optional 2FA for HioBuy Pay), Stripe Checkout with verified webhook settlement, multi-account bank transfer top-ups, immutable freight/procurement cost and profit snapshots, PDF shipping documents, SMTP and Cloudflare Email Sending delivery, external Client API with Bearer auth and OpenAPI docs, and the per-user Workers AI assistant (`ForwardingAssistant` Durable Object).
+- **Dual-Worker Same-Origin Deployment**: Web Worker (`cloudflare.config.ts`) and API Worker (`wrangler.jsonc`) deployed under a single custom domain, using same-origin `/api/*` from the browser and an `API` service binding for server-side rendering.

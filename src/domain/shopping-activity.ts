@@ -1,0 +1,10 @@
+import { z } from 'zod';
+import { purchaseChannel } from './purchase';
+import { favoriteInput, shoppingPageInput } from './shopping';
+const httpsUrl=z.string().url().max(2000).refine(value=>{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password;},'Use an HTTPS URL without credentials.');
+export const shopIdentityInput=z.object({channel:purchaseChannel,shopId:z.string().trim().min(1).max(200)}).strict();
+export const shopSubscriptionInput=shopIdentityInput.extend({name:z.string().trim().min(1).max(200).optional(),url:httpsUrl.optional(),imageUrl:httpsUrl.optional()}).strict();
+export const shoppingActivityPage=shoppingPageInput.extend({channel:purchaseChannel.optional()}).strict();
+export const browsingHistoryInput=favoriteInput;
+export const activityId=z.string().uuid();
+export const HISTORY_LIMIT=200;

@@ -1,0 +1,2 @@
+ALTER TABLE `product_categories` ADD `parent_id` text REFERENCES product_categories(id);--> statement-breakpoint
+CREATE INDEX `product_categories_parent_sort` ON `product_categories` (`parent_id`,`sort_order`,`id`);

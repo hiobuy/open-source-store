@@ -1,0 +1,1 @@
+ALTER TABLE `procurement_items` ADD `product_snapshot` text;

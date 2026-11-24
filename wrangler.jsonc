@@ -1,0 +1,71 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "hiobuy-procurement",
+  "compatibility_date": "2026-10-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./server/index.ts",
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ForwardingAssistant", "class_name": "ForwardingAssistant" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ForwardingAssistant"] }],
+  "observability": {
+    "enabled": false,
+    "logs": {
+      "enabled": false,
+      "invocation_logs": false
+    },
+    "traces": {
+      "enabled": false
+    }
+  },
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "vars": {
+    "ENVIRONMENT": "development",
+    "PUBLIC_SITE_MODE": "integrated"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hiobuy-procurement",
+      "database_id": "00000000-0000-0000-0000-000000000001",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "hiobuy-procurement-photos" }],
+  "env": {
+    "production": {
+      "name": "hiobuy-procurement",
+      // Routes for the custom domain (<host>/api/*, <host>/agents/*) are managed in the Cloudflare dashboard.
+      "workers_dev": true,
+      "vars": {
+        "ENVIRONMENT": "production",
+        // APP_URL is a secret: wrangler secret put APP_URL --env production -c wrangler.jsonc
+        // (a dashboard-set plain var would be overwritten by `vars` on every deploy; secrets persist).
+        "PUBLIC_SITE_MODE": "integrated"
+      },
+      "ai": {
+        "binding": "AI"
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "ForwardingAssistant", "class_name": "ForwardingAssistant" }]
+      },
+      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ForwardingAssistant"] }],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "hiobuy-procurement",
+          // Replace with your production D1 database ID before deploying.
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      "r2_buckets": [{ "binding": "PHOTOS", "bucket_name": "hiobuy-procurement-photos" }]
+    }
+  }
+}

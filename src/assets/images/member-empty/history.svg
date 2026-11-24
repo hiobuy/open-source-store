@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" style="color:var(--primary,#cf1102)" fill="none">
+  <path d="M37 114c-7-27 15-57 45-61 28-3 35-24 69-18 28 5 52 16 56 43 4 33-29 51-62 56H78c-21 0-36-6-41-20Z" fill="currentColor" opacity=".07"/>
+  <ellipse cx="120" cy="134" rx="73" ry="5" fill="currentColor" opacity=".09"/>
+  <rect x="56" y="47" width="110" height="76" rx="11" fill="var(--card,#fff)" stroke="currentColor" stroke-width="2.3"/>
+  <path d="M57 65h108" stroke="currentColor" stroke-width="2" opacity=".5"/>
+  <path d="M69 56h2m5 0h2m5 0h2" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" opacity=".62"/>
+  <rect x="68" y="76" width="33" height="33" rx="5" fill="currentColor" opacity=".11"/>
+  <path d="m73 100 9-10 6 6 5-4 4 6" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round" opacity=".46"/>
+  <path d="M109 81h31m-31 9h19m-19 9h10" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" opacity=".32"/>
+  <circle cx="155" cy="101" r="28" fill="var(--card,#fff)" stroke="currentColor" stroke-width="2.5"/>
+  <circle cx="155" cy="101" r="22" fill="currentColor" opacity=".08"/>
+  <path d="M155 84v3m0 28v3m-17-17h3m28 0h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+  <path d="M155 91v10l7 5" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M184 45v12m-6-6h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".65"/>
+  <circle cx="43" cy="84" r="2.4" fill="currentColor" opacity=".42"/>
+</svg>

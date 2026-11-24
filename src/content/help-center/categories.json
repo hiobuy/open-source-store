@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1136,
+    "name": "Getting started",
+    "description": "Learn how to proxy shop and forward items",
+    "icon": "/assets/help-center/20260723-O6Q0khD8EoTraMBP.png"
+  },
+  {
+    "id": 1137,
+    "name": "Fill & buy",
+    "description": "Place shopping orders & request purchasing",
+    "icon": "/assets/help-center/20260723-UApvI1PiDACX5cNv.png"
+  },
+  {
+    "id": 1138,
+    "name": "Payment & fees",
+    "description": "Exchange rates, payment methods & topups",
+    "icon": "/assets/help-center/20260723-BlnQl7WfyFXMfGeY.png"
+  },
+  {
+    "id": 1139,
+    "name": "Forwarding & shipping",
+    "description": "Consolidation, packing & international routes",
+    "icon": "/assets/help-center/20260723-HZVukatdaPr2yMK6.png"
+  },
+  {
+    "id": 1140,
+    "name": "Customs & duties",
+    "description": "Tax declaration, duties & restricted items",
+    "icon": "/assets/help-center/20260723-azP9uf1sTSTSsLhh.png"
+  },
+  {
+    "id": 1141,
+    "name": "Orders & tracking",
+    "description": "Order storage time, photos & parcel status",
+    "icon": "/assets/help-center/20260723-JqM2f1bVpBhV2LM3.png"
+  },
+  {
+    "id": 1142,
+    "name": "Returns & refunds",
+    "description": "After-sales returns, disputes & refunds",
+    "icon": "/assets/help-center/20260723-qWGGL8G7hxbbR1N4.png"
+  }
+]

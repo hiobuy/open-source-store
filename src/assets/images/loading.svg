@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512" viewBox="0 0 512 512"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Shopping cart loading icon</title>
+  <desc id="desc">A shopping cart icon composed of independent SVG elements.</desc>
+
+  <style>
+    .route-loading-cart {
+      --cart-color: #333333;
+      --accent-color: var(--primary);
+    }
+
+    .cart-stroke {
+      fill: none;
+      stroke: var(--cart-color);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .accent {
+      fill: var(--accent-color);
+    }
+
+    /*
+     * Trim path 循环描边动画（4s 一个循环，前 1s 完整显示）：
+     * 0s~1s       完整购物车显示（含放射线与滚轮）
+     * 1s~1.4s     整体快速反向擦除
+     * 1.4s~2.4s   把手 → 篮筐 → 底座 → 内部线条依次重新描边
+     * 2.4s        放射线紧随弹出（保留 -45°/0°/45° 倾斜）
+     * 2.56s       滚轮随后弹出
+     * 2.84s~4s    完整购物车保持显示，进入下一轮
+     * 各段 dasharray 均 ≥ 路径实际长度，保证描边完整画出。
+     */
+    #cart-handle {
+      stroke-dasharray: 180;
+      --len: 180;
+      animation: trimHandle 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #cart-basket {
+      stroke-dasharray: 1200;
+      --len: 1200;
+      animation: trimBasket 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #cart-base {
+      stroke-dasharray: 320;
+      --len: 320;
+      animation: trimBase 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #cart-line-left {
+      stroke-dasharray: 140;
+      --len: 140;
+      animation: trimLines 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #cart-line-center {
+      stroke-dasharray: 140;
+      --len: 140;
+      animation: trimLines 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #cart-line-right {
+      stroke-dasharray: 140;
+      --len: 140;
+      animation: trimLines 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #ray-left {
+      transform-origin: 236px 97px;
+      --ray-rotate: -45deg;
+      animation: trimRays 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #ray-center {
+      transform-origin: 315px 105px;
+      --ray-rotate: 0deg;
+      animation: trimRays 4s cubic-bezier(.4, 0, .2, 1) .08s infinite both;
+    }
+
+    #ray-right {
+      transform-origin: 394px 97px;
+      --ray-rotate: 45deg;
+      animation: trimRays 4s cubic-bezier(.4, 0, .2, 1) .16s infinite both;
+    }
+
+    #wheel-left {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: trimWheels 4s cubic-bezier(.4, 0, .2, 1) infinite both;
+    }
+
+    #wheel-right {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: trimWheels 4s cubic-bezier(.4, 0, .2, 1) .1s infinite both;
+    }
+
+    /* 把手：前 1s 完整，之后反向擦除再描边 */
+    @keyframes trimHandle {
+      0%   { stroke-dashoffset: 0; opacity: 1; }
+      25%  { stroke-dashoffset: 0; opacity: 1; }
+      35%  { stroke-dashoffset: var(--len); opacity: 0; }
+      36%  { opacity: 1; }
+      45%  { stroke-dashoffset: 0; }
+      78%, 100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* 篮筐：1.48s 开始重新描边 */
+    @keyframes trimBasket {
+      0%   { stroke-dashoffset: 0; opacity: 1; }
+      25%  { stroke-dashoffset: 0; opacity: 1; }
+      35%  { stroke-dashoffset: var(--len); opacity: 0; }
+      37%  { opacity: 1; }
+      52%  { stroke-dashoffset: 0; }
+      78%, 100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* 底座：1.68s 开始重新描边 */
+    @keyframes trimBase {
+      0%   { stroke-dashoffset: 0; opacity: 1; }
+      25%  { stroke-dashoffset: 0; opacity: 1; }
+      35%  { stroke-dashoffset: var(--len); opacity: 0; }
+      42%  { opacity: 1; }
+      55%  { stroke-dashoffset: 0; }
+      78%, 100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* 内部线条：1.92s 开始重新描边 */
+    @keyframes trimLines {
+      0%   { stroke-dashoffset: 0; opacity: 1; }
+      25%  { stroke-dashoffset: 0; opacity: 1; }
+      35%  { stroke-dashoffset: var(--len); opacity: 0; }
+      48%  { opacity: 1; }
+      60%  { stroke-dashoffset: 0; }
+      78%, 100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+
+    /* 放射线：前 1s 完整显示，重描边后即刻弹出并保持（保留各自的倾斜） */
+    @keyframes trimRays {
+      0%, 25%   { opacity: 1; transform: rotate(var(--ray-rotate)) scale(1); }
+      35%       { opacity: 0; transform: rotate(var(--ray-rotate)) scale(.6); }
+      52%       { opacity: 0; transform: rotate(var(--ray-rotate)) scale(.6); }
+      60%       { opacity: 1; transform: rotate(var(--ray-rotate)) scale(1); }
+      66%       { opacity: 1; transform: rotate(var(--ray-rotate)) scale(.86); }
+      71%       { opacity: 1; transform: rotate(var(--ray-rotate)) scale(1); }
+      78%, 100% { opacity: 1; transform: rotate(var(--ray-rotate)) scale(1); }
+    }
+
+    /* 滚轮：前 1s 完整显示，紧随放射线弹出并轻弹后保持 */
+    @keyframes trimWheels {
+      0%, 25%   { opacity: 1; transform: translateY(0) scale(1); }
+      35%       { opacity: 0; transform: translateY(8px) scale(.7); }
+      56%       { opacity: 0; transform: translateY(8px) scale(.7); }
+      64%       { opacity: 1; transform: translateY(0) scale(1); }
+      70%       { opacity: 1; transform: translateY(-6px); }
+      75%       { opacity: 1; transform: translateY(0); }
+      78%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* 系统开启"减弱动态效果"时静态展示完整购物车 */
+    @media (prefers-reduced-motion: reduce) {
+      .cart-stroke path,
+      .cart-stroke line,
+      .accent {
+        animation: none !important;
+        opacity: 1;
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+
+  <!-- 顶部橙色放射元素 -->
+  <g id="rays">
+    <rect id="ray-left"
+          class="accent"
+          x="201" y="69" width="34" height="92" rx="17"
+          transform="rotate(-45 236 97)" />
+
+    <rect id="ray-center"
+          class="accent"
+          x="298" y="55" width="34" height="100" rx="17" />
+
+    <rect id="ray-right"
+          class="accent"
+          x="395" y="69" width="34" height="92" rx="17"
+          transform="rotate(45 394 97)" />
+  </g>
+
+  <!-- 购物车主体 -->
+  <g id="cart" class="cart-stroke">
+    <path id="cart-handle"
+          d="M35 173
+             H92
+             C110 173 139 180 140 215" />
+
+    <path id="cart-basket"
+          d="M137 202
+             H475
+             L432 368
+             C426 392 407 405 380 405
+             H232
+             C207 405 190 392 180 369
+             Z" />
+
+    <path id="cart-base"
+          d="M181 369
+             C181 408 203 430 239 430
+             H407" />
+  </g>
+
+  <!-- 篮筐内部线条 -->
+  <g id="cart-inner-lines" class="cart-stroke">
+    <line id="cart-line-left" x1="242" y1="260" x2="263" y2="345" />
+    <line id="cart-line-center" x1="316" y1="252" x2="316" y2="346" />
+    <line id="cart-line-right" x1="390" y1="260" x2="369" y2="345" />
+  </g>
+
+  <!-- 独立滚轮，位置已下移 -->
+  <g id="wheels">
+    <circle id="wheel-left" class="accent" cx="245" cy="477" r="31" />
+    <circle id="wheel-right" class="accent" cx="382" cy="477" r="31" />
+  </g>
+</svg>

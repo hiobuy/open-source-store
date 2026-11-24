@@ -1,0 +1,1 @@
+ALTER TABLE `procurement_orders` ADD `order_type` text DEFAULT 'standard' NOT NULL;
