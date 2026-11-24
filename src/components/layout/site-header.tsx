@@ -45,6 +45,11 @@ type MarketplaceHeaderProps = CommerceHeaderProps;
 const HEADER_SETTINGS: MarketplaceHeaderProps = {
   logoLink: "/",
   topAdsAutoPlayInterval: 5,
+  topAdsItems: [
+    { imageUrl: "/assets/images/top-ads/welcome-perks.webp" },
+    { imageUrl: "/assets/images/top-ads/shipping-specials-mint.webp" },
+    { imageUrl: "/assets/images/top-ads/limited-time-deals.webp" },
+  ],
   topNavItems: [
     { label: "Home", path: "/" },
     { label: "Forwarding", path: "/forwarding" },
@@ -193,14 +198,14 @@ export function SiteHeader() {
                                 style={
                                   selected
                                     ? {
-                                        background: "var(--primary)",
-                                        borderColor: "var(--primary)",
-                                        color: "#ffffff",
-                                      }
+                                      background: "var(--primary)",
+                                      borderColor: "var(--primary)",
+                                      color: "#ffffff",
+                                    }
                                     : {
-                                        borderColor: "#D9D9D9",
-                                        color: "#333333",
-                                      }
+                                      borderColor: "#D9D9D9",
+                                      color: "#333333",
+                                    }
                                 }
                                 onClick={() =>
                                   runtime.setPendingLanguage(lang.code)
@@ -227,14 +232,14 @@ export function SiteHeader() {
                                 style={
                                   selected
                                     ? {
-                                        background: "var(--primary)",
-                                        borderColor: "var(--primary)",
-                                        color: "#ffffff",
-                                      }
+                                      background: "var(--primary)",
+                                      borderColor: "var(--primary)",
+                                      color: "#ffffff",
+                                    }
                                     : {
-                                        borderColor: "#D9D9D9",
-                                        color: "#333333",
-                                      }
+                                      borderColor: "#D9D9D9",
+                                      color: "#333333",
+                                    }
                                 }
                                 onClick={() => runtime.setPendingCurrency(code)}
                               >
@@ -457,11 +462,11 @@ export function SiteHeader() {
                             style={
                               runtime.activeCategoryIndex === index
                                 ? {
-                                    background:
-                                      "color-mix(in srgb, var(--primary) 7%, white)",
-                                    color: "var(--primary)",
-                                    fontWeight: 600,
-                                  }
+                                  background:
+                                    "color-mix(in srgb, var(--primary) 7%, white)",
+                                  color: "var(--primary)",
+                                  fontWeight: 600,
+                                }
                                 : undefined
                             }
                             onMouseEnter={() =>
