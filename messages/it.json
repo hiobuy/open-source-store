@@ -998,7 +998,6 @@
   "The service is temporarily unavailable Please try again": "Il servizio è temporaneamente non disponibile. Per favore riprova.",
   "Please select an article from the Help Center": "Seleziona un articolo dal Centro assistenza",
   "Please check the selected options and quantities": "Si prega di verificare le opzioni e le quantità selezionate",
-  "Hiobuy official website": "Sito ufficiale Hiobuy",
   "Your project is ready": "Il tuo progetto è pronto",
   "Start building your website here": "Inizia a costruire il tuo sito web qui",
   "Read the docs": "Leggi i documenti",
@@ -1223,5 +1222,6 @@
   "Unable to recognize this product": "Impossibile riconoscere questo prodotto",
   "Back to top": "Torna su",
   "Cart, {count} items": "Carrello, {count} articoli",
-  "Open source on GitHub": "Open source su GitHub"
+  "Open source on GitHub": "Open source su GitHub",
+  "HIOBuy Store Demo": "Demo di HIOBuy Store"
 }

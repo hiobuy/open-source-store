@@ -998,7 +998,6 @@
   "The service is temporarily unavailable Please try again": "服务暂时不可用，请稍后重试",
   "Please select an article from the Help Center": "请从帮助中心选择需要查看的文章",
   "Please check the selected options and quantities": "请检查所选规格和数量",
-  "Hiobuy official website": "Hiobuy 官方网站",
   "Your project is ready": "项目已就绪",
   "Start building your website here": "从这里开始构建你的官网",
   "Read the docs": "查看文档",
@@ -1223,5 +1222,6 @@
   "Unable to recognize this product": "无法识别该商品",
   "Back to top": "回到顶部",
   "Cart, {count} items": "购物车，{count} 件商品",
-  "Open source on GitHub": "GitHub 仓库"
+  "Open source on GitHub": "GitHub 仓库",
+  "HIOBuy Store Demo": "HIOBuy Store 演示站"
 }

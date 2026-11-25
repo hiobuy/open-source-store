@@ -47,12 +47,6 @@ const services = [
       "Cost-effective packagingbased on item size;professional handling forsafety",
   },
 ] as const;
-export async function generateMetadata() {
-  const t = await getTranslations();
-  return {
-    title: { absolute: `Hiobuy - ${t("Buy from China & worldwide delivery")}` },
-  };
-}
 export default async function Page() {
   const t = await getTranslations();
   return (

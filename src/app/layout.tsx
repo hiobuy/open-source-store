@@ -25,10 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: "Hiobuy",
-      template: "%s · Hiobuy",
+      default: "HIOBuy Store Demo | Open-Source Commerce Platform",
+      template: "%s · HIOBuy Store Demo | Open-Source Commerce Platform",
     },
-    description: t("Hiobuy official website"),
+    description: t("HIOBuy Store Demo"),
   };
 }
 

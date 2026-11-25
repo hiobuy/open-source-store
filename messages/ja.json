@@ -998,7 +998,6 @@
   "The service is temporarily unavailable Please try again": "サービスは一時的にご利用いただけません。もう一度試してください。",
   "Please select an article from the Help Center": "ヘルプセンターから記事を選択してください",
   "Please check the selected options and quantities": "選択したオプションと数量を確認してください",
-  "Hiobuy official website": "Hiobuy公式サイト",
   "Your project is ready": "プロジェクトの準備が完了しました",
   "Start building your website here": "ここからウェブサイトの構築を始めましょう",
   "Read the docs": "ドキュメントを読む",
@@ -1223,5 +1222,6 @@
   "Unable to recognize this product": "この商品を認識できません",
   "Back to top": "トップへ戻る",
   "Cart, {count} items": "カート、{count}点",
-  "Open source on GitHub": "GitHub でオープンソース公開中"
+  "Open source on GitHub": "GitHub でオープンソース公開中",
+  "HIOBuy Store Demo": "HIOBuy Store デモ"
 }

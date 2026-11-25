@@ -998,7 +998,6 @@
   "The service is temporarily unavailable Please try again": "일시적으로 서비스를 이용할 수 없습니다. 다시 시도해 주세요.",
   "Please select an article from the Help Center": "도움말 센터에서 기사를 선택하세요.",
   "Please check the selected options and quantities": "선택한 옵션과 수량을 확인해주세요.",
-  "Hiobuy official website": "Hiobuy 공식 홈페이지",
   "Your project is ready": "프로젝트가 준비되었습니다",
   "Start building your website here": "여기에서 웹사이트 구축을 시작하세요",
   "Read the docs": "문서 읽기",
@@ -1223,5 +1222,6 @@
   "Unable to recognize this product": "이 상품을 인식할 수 없습니다",
   "Back to top": "맨 위로",
   "Cart, {count} items": "카트, 상품 {count}개",
-  "Open source on GitHub": "GitHub 오픈소스"
+  "Open source on GitHub": "GitHub 오픈소스",
+  "HIOBuy Store Demo": "HIOBuy Store 데모"
 }
