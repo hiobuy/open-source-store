@@ -47,6 +47,8 @@ Selling prices and exchange rates are preserved as snapshots. Explicit non-negat
 
 ## Admin operations and recovery
 
+For 1688 orders, the create response's `payment` is the total payable in CNY minor units and already includes `shipping`. For example, goods costing ¥4.44 and domestic freight of ¥2.00 produce a payable total of ¥6.44. The receipt check uses that total. Before payment, the server reads the linked order's current total and checks the operator's payment limit. For an existing order held for amount review, refresh its remote status to recheck the cost against the paid bill.
+
 "Procurement Orders -> New HioBuy Purchase Order" supports customer selection, product search/link parsing, SKU, quantity, preview, and request creation. The legacy manual draft entry remains available, and existing drafts are not automatically submitted to remote.
 
 The HioBuy panel in order detail displays procurement cost, remote ID, submission and payment statuses, and operation logs. `procurement.write` allows submitting, querying, and canceling; paying and manual reconciliation require `payments.money`; `support` is read-only.
