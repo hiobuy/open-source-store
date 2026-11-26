@@ -16,6 +16,17 @@ export const purchasePaymentInput = z.object({confirm:z.literal(true),billVersio
 export const purchaseActionInput = z.object({ confirm: z.literal(true), reason: z.string().trim().min(2).max(500).optional(), code:z.string().trim().max(40).optional(), maxCostCnyCents:z.number().int().min(0).max(999999999).optional() }).strict();
 export type PurchaseInput = z.infer<typeof purchasePreviewInput>;
 export function record(value: unknown): Record<string, unknown> { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {}; }
+const purchaseTimestamp = z.iso.datetime({ local: true, offset: true });
+
+/** Standard purchase detail may confirm payment with order.times.paid_at alone. */
+export function purchaseDetailPayment(detail: Record<string, unknown>): "paid" | "paid_at" | "conflict" | "unconfirmed" {
+  const order = record(detail.order);
+  const status = String(order.payment_status ?? detail.payment_status ?? "").trim().toLowerCase();
+  if (status === "paid" || status === "success") return "paid";
+  const paidAt = record(order.times).paid_at;
+  if (typeof paidAt !== "string" || !purchaseTimestamp.safeParse(paidAt.trim().replace(" ", "T")).success) return "unconfirmed";
+  return status ? "conflict" : "paid_at";
+}
 export function stringId(value: unknown): string | null { return typeof value === "string" && value.length > 0 ? value : typeof value === "number" && Number.isSafeInteger(value) ? String(value) : null; }
 function minor(value: unknown) { const m = record(value); if (m.currency !== "CNY" || !Number.isSafeInteger(m.amount) || Number(m.amount) < 0) throw new Error("HioBuy did not return a confirmed CNY amount."); return Number(m.amount); }
 /** Prices come only from a validated standard preview, never product yuan fields or the browser. */

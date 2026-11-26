@@ -26,7 +26,7 @@ import { fillPurchaseMedia, productMedia, readProductMedia } from "./purchase-me
 import { orderDetail } from "./operations";
 import { createPurchase, customerPurchase, listCustomerPurchases, payPurchaseBill, performPurchaseAction, previewPurchase, reconcilePurchase } from "./purchase";
 import { readProductPolicy, saveProductPolicy } from "./product-billing";
-import { pricePurchase, purchasePreviewInput } from "../src/domain/purchase";
+import { pricePurchase, purchaseDetailPayment, purchasePreviewInput } from "../src/domain/purchase";
 import { publicProduct, queryProducts } from "./purchase-products";
 import { can, permissionFor } from "../src/domain/staff";
 let mf:Miniflare,db:Database;
@@ -446,6 +446,52 @@ describe("HioBuy purchase contracts",()=>{
     fakeRemote({"/v1/orders/detail":{order:{order_id:r.remoteId,status:"WAIT_SELLER_SEND_GOODS",payment_status:"paid",total:money(2200)}}});
     expect((await performPurchaseAction(db,token,actor,order.id,"sync"))?.paymentStatus).toBe("paid");
     expect((await procurementOverviews(db,[order.id],true))[0]).toMatchObject({paidCostCnyCents:2200,profitCnyCents:200});
+  });
+  it("recognizes a dated payment on a linked order during sync and never pays it again", async () => {
+    fakeRemote();
+    const order = await makeOrder();
+    await payPurchaseBill(db, actor, order.id);
+    const created = await performPurchaseAction(db, token, actor, order.id, "create");
+    const detail = { order: { order_id: created!.remoteId, total: money(2200), times: { paid_at: "2026-11-25 15:00:22" } } };
+    const paidRemote = fakeRemote({ "/v1/orders/detail": detail });
+    await expect(performPurchaseAction(db, token, actor, order.id, "pay")).rejects.toMatchObject({ status: 409 });
+    expect(paidRemote.mock.calls.some(([url]) => String(url).endsWith("/pay"))).toBe(false);
+
+    const unconfirmed = fakeRemote({ "/v1/orders/pay": { success: true, order_sn: created!.remoteId } });
+    expect(await performPurchaseAction(db, token, actor, order.id, "pay")).toMatchObject({ paymentStatus: "unknown" });
+    expect(unconfirmed.mock.calls.filter(([url]) => String(url).endsWith("/pay"))).toHaveLength(1);
+    fakeRemote({ "/v1/orders/detail": { order: { ...detail.order, total: money(2100) } } });
+    expect(await performPurchaseAction(db, token, actor, order.id, "sync")).toMatchObject({ paymentStatus: "unknown", paidCostCnyCents: null });
+    const sync = fakeRemote({ "/v1/orders/detail": detail });
+    expect(await performPurchaseAction(db, token, actor, order.id, "sync")).toMatchObject({
+      paymentStatus: "paid", paidCostCnyCents: 2200, attempts: expect.arrayContaining([{ action: "pay", state: "succeeded", createdAt: expect.any(Number), updatedAt: expect.any(Number) }]),
+    });
+    await performPurchaseAction(db, token, actor, order.id, "pay");
+    expect(sync.mock.calls.some(([url]) => String(url).endsWith("/pay"))).toBe(false);
+  });
+  it("checks the linked detail once when the pay acknowledgement omits payment_status", async () => {
+    fakeRemote();
+    const order = await makeOrder();
+    await payPurchaseBill(db, actor, order.id);
+    const created = await performPurchaseAction(db, token, actor, order.id, "create");
+    const times = { paid_at: null as string | null };
+    const fetcher = fakeRemote({
+      "/v1/orders/detail": { order: { order_id: created!.remoteId, total: money(2200), times } },
+      "/v1/orders/pay": { success: true, order_sn: created!.remoteId, msg: "success" },
+    });
+    vi.stubGlobal("fetch", async (...args: Parameters<typeof fetch>) => {
+      const response = await fetcher(...args);
+      if (String(args[0]).endsWith("/pay")) times.paid_at = "2026-11-25 15:00:22";
+      return response;
+    });
+    expect(await performPurchaseAction(db, token, actor, order.id, "pay")).toMatchObject({ paymentStatus: "paid", paidCostCnyCents: 2200 });
+    expect(fetcher.mock.calls.map(([url]) => new URL(String(url)).pathname)).toEqual(["/v1/orders/detail", "/v1/orders/pay", "/v1/orders/detail"]);
+  });
+  it("requires valid payment evidence and detects contradictory payment status", () => {
+    for (const paid_at of [null, "", "0000-00-00 00:00:00", "2026-02-31 12:00:00", "invalid"]) {
+      expect(purchaseDetailPayment({ order: { status: "wait_receive", times: { paid_at } } })).toBe("unconfirmed");
+    }
+    expect(purchaseDetailPayment({ order: { payment_status: "unpaid", times: { paid_at: "2026-11-25 15:00:22" } } })).toBe("conflict");
   });
   it("reconciles an uncertain create only after checking the remote identity and amount",async()=>{
     fakeRemote();const order=await makeOrder();await payPurchaseBill(db,actor,order.id);

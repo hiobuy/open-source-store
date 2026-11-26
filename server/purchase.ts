@@ -16,7 +16,7 @@ import { queryProducts, type publicProduct } from "./purchase-products";
 import { AppError } from "./errors";
 import { parseInput } from "./operations-input";
 import { readProductPolicy, productPricingSettings } from "./product-billing";
-import { customerPurchaseQuote, pricePurchase, purchaseCreateInput, purchasePreviewInput, record, stringId, type PurchaseInput } from "../src/domain/purchase";
+import { customerPurchaseQuote, pricePurchase, purchaseCreateInput, purchaseDetailPayment, purchasePreviewInput, record, stringId, type PurchaseInput } from "../src/domain/purchase";
 import type { ProductQuote } from "../src/domain/product-pricing";
 import { callProcurement, requireProcurementResult } from "./services/hiobuy/procurement";
 
@@ -227,14 +227,21 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
     const order=record(result.order),returnedId=stringId(order.order_id??order.id??result.order_id);
     if(returnedId!==r.remoteId)conflict("Remote order identity did not match.");
     const status=typeof order.status==="string"&&/^[a-zA-Z_0-9-]{1,60}$/.test(order.status)?order.status:null;
-    const payment=order.payment_status??result.payment_status;
-    const paid=["paid","success"].includes(String(payment).toLowerCase());
+    const payment = purchaseDetailPayment(result);
     const cancelled=["cancelled","canceled","closed"].includes(String(status).toLowerCase());
     const amount=remoteAmount(result,r.channel);
+    let paid = payment === "paid";
+    if (payment === "paid_at" && amount !== null) {
+      const [attempt] = await db.select({ request: purchaseAttempts.request }).from(purchaseAttempts)
+        .where(and(eq(purchaseAttempts.orderId, id), eq(purchaseAttempts.action, "pay")));
+      const requested = attempt && record(JSON.parse(attempt.request)).pay_amount;
+      paid = requested == null || requested === amount;
+    }
+    const reviewPayment = !paid && payment !== "unconfirmed" && r.paymentStatus !== "paid";
     const mismatch=r.channel === "manual" && !paid && r.paymentStatus === "unpaid" ? amount === null || amount !== r.costCnyCents : await costCoverage(db,id,amount)!=="covered";
     const [synced] = await db.batch([
-      db.update(procurementRemote).set({syncNextAt:Date.now()+5*60_000,remoteId:r.remoteId,remoteStatus:status,lastResult:JSON.stringify(result),updatedAt:Date.now(),...(["unknown","creating","review_required"].includes(r.state)?{state:mismatch?"review_required":"created"}:{}),...(paid?{paymentStatus:"paid",state:"created",paidCostCnyCents:sql`COALESCE(${procurementRemote.paidCostCnyCents}, ${amount})`}:{}),...(mismatch?{state:"review_required"}:{}),...(cancelled?{state:"cancelled"}:{})}).where(and(eq(procurementRemote.orderId,id),eq(procurementRemote.updatedAt,r.updatedAt))).returning({orderId:procurementRemote.orderId}),
-      db.update(purchaseAttempts).set({state:"succeeded",updatedAt:Date.now()}).where(and(eq(purchaseAttempts.orderId,id),eq(purchaseAttempts.action,paid?"pay":"cancel"),sql`${paid||cancelled?1:0}=1`)),
+      db.update(procurementRemote).set({syncNextAt:Date.now()+5*60_000,remoteId:r.remoteId,remoteStatus:status,lastResult:JSON.stringify(result),updatedAt:Date.now(),...(["unknown","creating","review_required"].includes(r.state)?{state:mismatch?"review_required":"created"}:{}),...(paid?{paymentStatus:"paid",state:"created",paidCostCnyCents:sql`COALESCE(${procurementRemote.paidCostCnyCents}, ${amount})`}:{}),...(reviewPayment?{paymentStatus:"unknown"}:{}),...(mismatch?{state:"review_required"}:{}),...(cancelled?{state:"cancelled"}:{})}).where(and(eq(procurementRemote.orderId,id),eq(procurementRemote.updatedAt,r.updatedAt))).returning({orderId:procurementRemote.orderId}),
+      db.update(purchaseAttempts).set({state:"succeeded",updatedAt:Date.now()}).where(and(eq(purchaseAttempts.orderId,id),eq(purchaseAttempts.action,paid?"pay":"cancel"),sql`${paid||cancelled?1:0}=1 AND changes()=1`)),
       db.update(purchaseAttempts).set({state:"succeeded",updatedAt:Date.now()}).where(and(eq(purchaseAttempts.orderId,id),eq(purchaseAttempts.action,"create"),sql`EXISTS (SELECT 1 FROM procurement_remote WHERE order_id=${id} AND remote_id=${r.remoteId})`)),
     ]);
     if (!synced.length) conflict();
@@ -273,7 +280,8 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
       const remoteOrder=record(detail.order);
       if(stringId(remoteOrder.order_id??remoteOrder.id??detail.order_id)!==r.remoteId)conflict("Remote order identity did not match.");
       const amount=remoteAmount(detail,r.channel);
-      if(r.channel === "manual" && (amount !== r.costCnyCents || ["paid","success"].includes(String(remoteOrder.payment_status??detail.payment_status).toLowerCase()))) conflict("Manual purchase cost or payment state changed. Refresh remote status before paying.");
+      if (purchaseDetailPayment(detail) !== "unconfirmed") conflict("HioBuy reports a payment for this order. Refresh remote status before paying.");
+      if(r.channel === "manual" && amount !== r.costCnyCents) conflict("Manual purchase cost or payment state changed. Refresh remote status before paying.");
       if(await costCoverage(db,id,amount)!=="covered")conflict("Customer receipts do not cover the HioBuy cost, or the historical exchange rate is unavailable.");
       if(maxCostCnyCents!==undefined && (amount===null || amount>maxCostCnyCents))conflict("The HioBuy cost exceeds your confirmed payment limit. Review the order before paying.");
       confirmedPayAmount=Number(amount);
@@ -283,7 +291,7 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
   const attemptId=`purchase-${action}-${crypto.randomUUID()}`,now=Date.now(),expected=action==="create"?"ready":r.state;
   const [claimed]=await db.batch([
     db.insert(purchaseAttempts).select(sql`SELECT ${attemptId},${id},${action},'executing',${JSON.stringify(body)},NULL,${actor.id},${now},${now}
-      WHERE EXISTS (SELECT 1 FROM procurement_remote r JOIN procurement_orders o ON o.id=r.order_id WHERE r.order_id=${id} AND r.state=${expected} AND o.status='draft')
+      WHERE EXISTS (SELECT 1 FROM procurement_remote r JOIN procurement_orders o ON o.id=r.order_id WHERE r.order_id=${id} AND r.state=${expected} AND o.status='draft' AND (${action}<>'pay' OR r.payment_status='unpaid'))
       AND (${action}='cancel' OR NOT EXISTS (SELECT 1 FROM purchase_stripe_payments s JOIN payments p ON p.id=s.id WHERE s.order_id=${id} AND p.risk_status IS NOT NULL))
       AND (${action}='cancel' OR EXISTS (SELECT 1 FROM procurement_bills WHERE order_id=${id} AND status='paid'))`).onConflictDoNothing().returning({id:purchaseAttempts.id}),
     db.update(procurementRemote).set({state:action==="create"?"creating":action==="cancel"?"cancel_pending":"paying",updatedAt:now}).where(and(eq(procurementRemote.orderId,id),sql`EXISTS (SELECT 1 FROM purchase_attempts WHERE id=${attemptId} AND state='executing' AND created_at=${now})`)),
@@ -294,7 +302,16 @@ export async function performPurchaseAction(db: Database, token: string, actor: 
   const success=!result.uncertain&&result.status>=200&&result.status<300&&data.success!==false&&!data.error;
   const remoteId=action==="create"?createdRemoteId(data,id):r.remoteId;
   const confirmed=success&&!!remoteId&&data.pending!==true;
-  const settled=action==="pay"&&confirmed&&data.success===true&&data.payment_status==="success";
+  let settled=action==="pay"&&confirmed&&data.success===true&&data.payment_status==="success";
+  if (action === "pay" && confirmed && data.success === true && data.payment_status == null && (!data.order_sn || data.order_sn === remoteId)) {
+    const lookup = await callProcurement(token, "orderDetail", { channel: r.channel, order_id: remoteId, response_format: "standard" });
+    const detail = lookup.data;
+    const order = record(detail.order);
+    const payment = purchaseDetailPayment(detail);
+    settled = !lookup.uncertain && lookup.status >= 200 && lookup.status < 300 && detail.success !== false && !detail.error &&
+      stringId(order.order_id ?? order.id ?? detail.order_id) === remoteId &&
+      remoteAmount(detail, r.channel) === confirmedPayAmount && (payment === "paid" || payment === "paid_at");
+  }
   const creationCoverage=action==="create"&&confirmed?await costCoverage(db,id,remoteAmount(data,r.channel)):null;
   const state=action==="create"?(confirmed?(creationCoverage!==null&&creationCoverage!=="covered"?"review_required":"created"):"unknown"):action==="cancel"?"cancel_pending":"created";
   const attemptState=action==="pay"?(settled?"succeeded":"unknown"):confirmed?"succeeded":"unknown";

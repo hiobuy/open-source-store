@@ -50,6 +50,7 @@ export const zhHans: Record<string, string> = {
 "Manual purchase bills are generated from confirmed warehouse amounts.": "手工单账单由仓库确认金额生成。",
 "Retry the original manual submission to recover its complete fee and item snapshot.": "请重试原手工单提交，恢复完整的费用和商品快照。",
 "Manual purchase cost or payment state changed. Refresh remote status before paying.": "手工单费用或付款状态已变化，请先刷新远端状态。",
+"HioBuy reports a payment for this order. Refresh remote status before paying.": "HioBuy 已有该订单的付款记录，请先刷新远端状态，避免重复付款。",
 "Announcements": "公告",
 "Publish updates for your customers.": "发布面向客户的公告和通知。",
 "New announcement": "新增公告",
